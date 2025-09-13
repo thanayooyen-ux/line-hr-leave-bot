@@ -1,0 +1,17 @@
+{
+  "type": "bubble",
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {"type":"text","text":"สรุปวันลาคงเหลือ","weight":"bold","size":"lg"},
+      {"type":"separator","margin":"md"},
+      {"type":"box","layout":"vertical","margin":"md","spacing":"sm","contents":[
+        {"type":"text","text":"Annual: 4/6 วัน"},
+        {"type":"text","text":"Sick: 26/30 วัน"},
+        {"type":"text","text":"Personal: 2/3 วัน"},
+        {"type":"text","text":"Unpaid: ไม่จำกัด (หักเงิน)"}
+      ]}
+    ]
+  }
+}

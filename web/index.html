@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ยื่นลางาน (LIFF)</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="/liff/env.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,.04); }
+    label { display:block; margin: 10px 0 4px; }
+    input, select, textarea { width: 100%; padding: 10px; border:1px solid #ccc; border-radius: 8px; }
+    button { padding: 12px 16px; border:0; border-radius: 10px; background:#06c755; color:#fff; font-weight:600; margin-top:12px; }
+    .muted { color:#666; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h3>แบบฟอร์มยื่นลางาน</h3>
+    <div class="muted">หน้านี้เปิดอยู่ใน LIFF</div>
+    <form id="leaveForm">
+      <label>ประเภทการลา</label>
+      <select name="type" required>
+        <option value="annual">Annual (ลาพักร้อน)</option>
+        <option value="sick">Sick (ลาป่วย)</option>
+        <option value="personal">Personal (ลากิจ)</option>
+        <option value="unpaid">Unpaid (ลาแบบหักเงิน)</option>
+      </select>
+      <label>วันที่เริ่ม</label>
+      <input type="date" name="startDate" required />
+      <label>วันที่สิ้นสุด</label>
+      <input type="date" name="endDate" required />
+      <label>เหตุผล</label>
+      <textarea name="reason" rows="3" placeholder="เหตุผลการลา (ถ้ามี)"></textarea>
+      <button type="submit">ส่งคำขอ</button>
+    </form>
+    <p id="status"></p>
+  </div>
+
+<script>
+(async () => {
+  const { LIFF_ID, BASE_URL } = window.__LIFF_ENV__ || {};
+  if (!LIFF_ID) {
+    document.getElementById('status').textContent = 'ยังไม่ได้ตั้งค่า LIFF_ID ใน .env';
+    return;
+  }
+  await liff.init({ liffId: LIFF_ID });
+  if (!liff.isLoggedIn()) liff.login();
+
+  const form = document.getElementById('leaveForm');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const profile = await liff.getProfile();
+    const userId = profile.userId;
+    const data = Object.fromEntries(new FormData(form).entries());
+    try {
+      const res = await fetch(`${BASE_URL}/api/leave`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, ...data })
+      });
+      const js = await res.json();
+      document.getElementById('status').textContent = js.ok ? 'ส่งคำขอแล้ว! ตรวจกล่องแชตสำหรับข้อความยืนยัน' : ('ผิดพลาด: ' + js.error);
+      if (liff.isInClient()) liff.closeWindow();
+    } catch (err) {
+      document.getElementById('status').textContent = 'ส่งไม่สำเร็จ';
+    }
+  });
+})();
+</script>
+</body>
+</html>
